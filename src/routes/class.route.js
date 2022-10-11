@@ -63,5 +63,47 @@ router.post("/", async function (req, res) {
     }
     res.status(400).send(resp); return;
 });
+// This method reset array length to zero
+router.patch("/", async function (req, res) {
+    const resp = {
+        status: false,
+        data: {},
+    };
+    let className = req.body.name;
+    let newName  = req.body.newName;
+    let teacher = req.body.teacher;
+    let student = req.body.student;
+    let period = req.body.period;
+    let classObj = null;
+    let isFound = await classModel.findOne({ name: className })
+    if (isFound) {
+        classObj = await classModel.findOneAndUpdate({ name: className }, {
+            $set: {
+                name:newName,
+                teachers: [teacher],
+                students: [student], periods: [period]
+            }
+        }, { new: true })
+        resp.status=true;
+        resp.data=classObj;
+    res.status(200).send(resp); return;
+    }
+    res.status(400).send(resp); return;
+});
+router.delete("/", async function (req, res) {
+    const resp = {
+        status: false,
+        data: {},
+    };
+    if (req.query.name !== undefined) {
+        let classObj = await classModel.deleteOne({ name: req.query.name.trim() });
+        if (classObj != null) {
+            resp.status = true;
+            resp.data = classObj;
+            return res.status(200).send(resp);
 
+        }
+    }
+    res.status(400).send(resp); return;
+});
 module.exports = router;
